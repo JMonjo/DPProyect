@@ -27,3 +27,6 @@ Thanks to this study you can easily filter by number of rooms and the maximum pr
 - How is the location of a flat related to the price?
 - How did the appearance of accomodation-sharing affected the hotel industry?
 # Finding Data
+## New York Dataset
+This dataset was gathered from Airbnb.com and the owner, a Drexel University’s student, Dgomonov (https://www.kaggle.com/dgomonov) shared it publicly on https://www.kaggle.com/dgomonov/new-york-city-airbnb-open-data. The dataset includes information about hosts, location and availability in New York for 2019. 
+The data consists of one dataset (AB_NYC_2019.csv) which is structured in 49075 observations and 16 features.
