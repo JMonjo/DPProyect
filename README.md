@@ -20,4 +20,10 @@ Thanks to this study you can easily filter by number of rooms and the maximum pr
     * This data driven project tries to answer whether sharing economy (such as airbnb) has contributed to a shortage in affordable housing in Berlin or not.
 * [Airbnb the Amsterdam story with interactive maps](https://www.kaggle.com/erikbruin/airbnb-the-amsterdam-story-with-interactive-maps)
     * This data driven project gives us an overview of the type of airbnb flats that are available in Amsterdam; as well as some advice to the municipality of Amsterdam in order to find fraudulent hosting; and also gives the tourists some features about the flats such as the neighbourhood safety, the reviews, the avg price by date, etc. so that they can decide where they want to stay.
+## Questions
+- Are there any different patterns when renting a shared flat depending on the country? (Not only in price, but in the type of room, type of apartment, etc.)
+- Is there a relationship between age and renting shared flats?
+- Is the accomodation-sharing sector growing?
+- How is the location of a flat related to the price?
+- How did the appearance of accomodation-sharing affected the hotel industry?
 # Finding Data
