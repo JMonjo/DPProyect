@@ -12,6 +12,11 @@ library("DataExplorer")
 library("ggplot2")
 library("grid")
 library("vcd")
+library("ggpubr") # Q-Q plots
+library("dplyr")
+library("tibble")
+library("caret")
+library("e1071") # dependency for KNN
 
 # Loading the data from the Dataset
 airbnbData <- read_csv(file = 'AB_NYC_2019.csv')
@@ -62,14 +67,31 @@ ggplot(data=airbnbData) + geom_boxplot(aes(x=neighbourhood_group, y= price, fill
 
 # STRENGTH OF RELATIONSHIPS
 
-# Formula: Price = b0 + b1*GrupoBarrio + b2*TipoVivienda + b3*NumeroMinimoNoches
+# Formula: Price ~ GrupoBarrio + TipoVivienda + NumeroMinimoNoches
+
+# First of all, let's crate a new dataset with the variables of interest
+airbnbData <- data.frame(price = airbnbData$price, neighbourhood_group = airbnbData$neighbourhood_group,
+                         room_type = airbnbData$room_type, minimum_nights = airbnbData$minimum_nights)
+
+# Let's check whether the values of our variables make sense
+range(airbnbData$price)
+# There are some 0 values for price, which does not make any sense
+sum(airbnbData$price == 0)
+# There are 11 observations with price equals to 0
+dim(airbnbData)
+# Our dataset contains 48895 observations, so we are going to remove these 11 observations with
+# price equals to 0 since this number is insignificant compared to the total number of observations.
+airbnbData <- airbnbData[airbnbData$price != 0,]
 
 # Let's factorize the strings columns
-#airbnbData$neighbourhood_group <- as.factor(airbnbData$neighbourhood_group)
-#airbnbData$room_type <- as.factor(airbnbData$room_type)
+airbnbData$neighbourhood_group <- as.factor(airbnbData$neighbourhood_group)
+airbnbData$room_type <- as.factor(airbnbData$room_type)
 
 # Multiple lineal regression analysis
 lm1 = lm(formula = price ~ neighbourhood_group + room_type + minimum_nights, data=airbnbData)
+#lm1.log = lm(formula = log(price) ~ neighbourhood_group + room_type + minimum_nights, data=airbnbData)
+#lm1.log2 = lm(formula = log(price) ~ neighbourhood_group + room_type + log(minimum_nights), data=airbnbData)
+#lm1.sin = lm(formula = log(price) ~ neighbourhood_group + room_type, data=airbnbData)
 
 # Coefficients
 summary(lm1)
@@ -90,6 +112,57 @@ summary(lm1)
 
 # Answer to relationships
 anova(lm1)
-# We can conclude that all of the variables are related as p < 0.05 for all of them.
+# We can conclude that all of the variables are relevant to the model as p < 0.05 for all of them.
+# However, the error obtained in the linear regression analysis is quite high, so we are going to
+# try to reduce this by taking into account the normal distribution of the continuous variables.
 
+# Let's check the normality of our data (continuous variables)
+# As we have a lot of observations, we are going to use a grafical description of the normality (Q-Q plots)
+# instead of conventional tests for normality since they are not such reliable when dealing with large samples
+ggqqplot(airbnbData$price)
+# This plot shows a sharp bend, which means that the price is not normally distributed
+# In order to normalize the data, we are going to get the logarithm of this variable
+ggqqplot(log(airbnbData$price))
+# We can appreciate how the normality distribution of the variable has imprived dramatically, which will help
+# as obtain a more accurate regression model
 
+# We will do the same for the minimum_nights
+ggqqplot(airbnbData$minimum_nights)
+ggqqplot(log(airbnbData$minimum_nights))
+
+# Now we are going to remake the regression analysis using the logarithm for the continuous variables
+lm1.log = lm(formula = log(price) ~ neighbourhood_group + room_type + log(minimum_nights), data=airbnbData)
+summary(lm1.log)
+anova(lm1.log)
+# We can appreciate that the R-square has increased dramatically regarding to the previous one. However, it
+# is not good enough in order to make good predictions.
+
+# PREDICTION
+
+airbnbData$price <- log(airbnbData$price)
+airbnbData$minimum_nights <- log(airbnbData$minimum_nights)
+
+# Create a set of training indices
+trainIndex <- createDataPartition(airbnbData$price,
+                                  p = .8,
+                                  list = FALSE,
+                                  times = 1
+)
+
+# Subset your data into training and testing set
+training_set <- airbnbData[ trainIndex, ]
+test_set <- airbnbData[ -trainIndex, ]
+
+fitControl <- trainControl(method = "cv", number = 10)
+
+# Train, specifying cross validation
+fit_with_cv <- train(price ~ ., data = training_set, method = "lm", trControl = fitControl)
+
+fit_with_cv <- train(price ~ ., data = training_set, method = "treebag", trControl = fitControl)
+
+fitControl <- trainControl(method = "cv", number = 10)
+neurons <- c(5)
+tune <- data.frame(neurons)
+fit_with_cv <- train(price ~ ., data = training_set, method = "brnn", trControl = fitControl, tuneGrid = tune, verbose=FALSE)
+
+fit_with_cv <- train(price ~ ., data = training_set, method = "gbm", trControl = fitControl, verbose=FALSE)
