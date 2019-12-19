@@ -16,7 +16,8 @@ library("ggpubr") # Q-Q plots
 library("dplyr")
 library("tibble")
 library("caret")
-library("e1071") # dependency for KNN
+library("e1071")
+library("Metrics")
 
 # Loading the data from the Dataset
 airbnbData <- read_csv(file = 'AB_NYC_2019.csv')
@@ -121,17 +122,19 @@ anova(lm1)
 # instead of conventional tests for normality since they are not such reliable when dealing with large samples
 ggqqplot(airbnbData$price)
 # This plot shows a sharp bend, which means that the price is not normally distributed
-# In order to normalize the data, we are going to get the logarithm of this variable
+# In order to normalize the distribution of the data, we are going to calculate the logarithm of this variable
 ggqqplot(log(airbnbData$price))
 # We can appreciate how the normality distribution of the variable has imprived dramatically, which will help
 # as obtain a more accurate regression model
+airbnbData$price <- log(airbnbData$price)
 
 # We will do the same for the minimum_nights
 ggqqplot(airbnbData$minimum_nights)
 ggqqplot(log(airbnbData$minimum_nights))
+airbnbData$minimum_nights <- log(airbnbData$minimum_nights)
 
 # Now we are going to remake the regression analysis using the logarithm for the continuous variables
-lm1.log = lm(formula = log(price) ~ neighbourhood_group + room_type + log(minimum_nights), data=airbnbData)
+lm1.log = lm(formula = price ~ neighbourhood_group + room_type + minimum_nights, data=airbnbData)
 summary(lm1.log)
 anova(lm1.log)
 # We can appreciate that the R-square has increased dramatically regarding to the previous one. However, it
@@ -139,8 +142,7 @@ anova(lm1.log)
 
 # PREDICTION
 
-airbnbData$price <- log(airbnbData$price)
-airbnbData$minimum_nights <- log(airbnbData$minimum_nights)
+# Now we are going to use the machine learning process in order to predict data
 
 # Create a set of training indices
 trainIndex <- createDataPartition(airbnbData$price,
@@ -156,13 +158,18 @@ test_set <- airbnbData[ -trainIndex, ]
 fitControl <- trainControl(method = "cv", number = 10)
 
 # Train, specifying cross validation
-fit_with_cv <- train(price ~ ., data = training_set, method = "lm", trControl = fitControl)
-
-fit_with_cv <- train(price ~ ., data = training_set, method = "treebag", trControl = fitControl)
+fit_with_cv <- train(price ~ ., data = training_set, method = "treebag", preProcess = "range", trControl = fitControl)
+# Random Forest algorithm
 
 fitControl <- trainControl(method = "cv", number = 10)
-neurons <- c(5)
+neurons <- c(6)
 tune <- data.frame(neurons)
-fit_with_cv <- train(price ~ ., data = training_set, method = "brnn", trControl = fitControl, tuneGrid = tune, verbose=FALSE)
+fit_with_cv <- train(price ~ ., data = training_set, method = "brnn", preProcess = "range", trControl = fitControl, tuneGrid = tune, verbose=FALSE)
+# Feed Forward Neural Network algorithm
 
-fit_with_cv <- train(price ~ ., data = training_set, method = "gbm", trControl = fitControl, verbose=FALSE)
+fit_with_cv <- train(price ~ ., data = training_set, method = "gbm", preProcess = "range", trControl = fitControl, verbose=FALSE)
+
+# In order to assess these machine learning methods, we have to use regression metrics due to the fact
+# that our dependent variable (price) is continuous
+basic_preds <- predict(fit_with_cv, test_set)
+rmse(test_set$price,basic_preds)
