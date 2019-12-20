@@ -158,18 +158,27 @@ test_set <- airbnbData[ -trainIndex, ]
 fitControl <- trainControl(method = "cv", number = 10)
 
 # Train, specifying cross validation
-fit_with_cv <- train(price ~ ., data = training_set, method = "treebag", preProcess = "range", trControl = fitControl)
+fit_with_cv1 <- train(price ~ ., data = training_set, method = "treebag", preProcess = "range", trControl = fitControl)
 # Random Forest algorithm
-
-fitControl <- trainControl(method = "cv", number = 10)
-neurons <- c(6)
-tune <- data.frame(neurons)
-fit_with_cv <- train(price ~ ., data = training_set, method = "brnn", preProcess = "range", trControl = fitControl, tuneGrid = tune, verbose=FALSE)
-# Feed Forward Neural Network algorithm
-
-fit_with_cv <- train(price ~ ., data = training_set, method = "gbm", preProcess = "range", trControl = fitControl, verbose=FALSE)
 
 # In order to assess these machine learning methods, we have to use regression metrics due to the fact
 # that our dependent variable (price) is continuous
-basic_preds <- predict(fit_with_cv, test_set)
+basic_preds <- predict(fit_with_cv1, test_set)
+rmse(test_set$price,basic_preds)
+dataset <- data.frame(basic_preds, test_set$price)
+
+tune <- expand.grid(neurons=1:4)
+fit_with_cv2 <- train(price ~ ., data = training_set, method = "brnn", preProcess = "range", trControl = fitControl, tuneGrid = tune, verbose=FALSE)
+# Feed Forward Neural Network algorithm
+
+# In order to assess these machine learning methods, we have to use regression metrics due to the fact
+# that our dependent variable (price) is continuous
+basic_preds <- predict(fit_with_cv2, test_set)
+rmse(test_set$price,basic_preds)
+
+fit_with_cv3 <- train(price ~ ., data = training_set, method = "gbm", preProcess = "range", trControl = fitControl, verbose=FALSE)
+
+# In order to assess these machine learning methods, we have to use regression metrics due to the fact
+# that our dependent variable (price) is continuous
+basic_preds <- predict(fit_with_cv3, test_set)
 rmse(test_set$price,basic_preds)
