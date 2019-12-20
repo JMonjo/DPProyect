@@ -10,7 +10,7 @@ Paper for group 11
 
 # Abstract
 We choosen the tourism domain because we think it´s constantly growing and the order of the day.
-We believe that airb&b is having a good influence on society and that it is receiving a good reception from users. Through this study we have verified that is not the future, is the present of this kind of business, and we have tried to predict the Price of an apartment in NY depending on the influence of different characteristics such as the neighborhood, the type of apartment or the minimum number of nights.
+We believe that airbnb is having a good influence on society and that it is receiving a good reception from users. Through this study we have verified that is not the future, is the present of this kind of business, and we have tried to predict the Price of an apartment in NY depending on the influence of different characteristics such as the neighborhood, the type of apartment or the minimum number of nights.
 
 # Introduction and Related Work
 We find Tourism domain  an interesting field since we think it’s a growing economic sector and according to the experts, now is the best moment to research and invest on it because thanks to new technologies as mobile apps and to the webs of collaborative economy as airbnb is possible to change the way we interact with the information since now its is more specific, easy to access and finally  is better for the users.
