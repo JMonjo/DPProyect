@@ -57,7 +57,7 @@ The features gathered in the dataset are:
 | room_type | String | Listing space type |
 | price | Integer | Price in dollars |
 | minimun_nights | Integer | Amount of nights minimum |
-| number_of_reviews | Integer | Number of reviews |
+| number\_of_reviews | Integer | Number of reviews |
 | last_review | Date | Latest review |
 | reviews_per_month | Integer | Number of reviews per month |
 | calculated_host_listings_count | Integer | Amount of listing per host |
